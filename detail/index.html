@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIG</title>
+    <script src="/sig.min.js"></script>
+    <style>
+        body {
+            font-family: monospace;
+            background: black;
+            color: white;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 0;
+            padding: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Device SIG</h2>
+    <ul id="sig"></ul>
+    <script>
+        function FPG() {
+            var options = {
+                NOT_AVAILABLE: 'unavailable',
+                ERROR: 'error',
+                EXCLUDED: 'excluded',
+                excludes: {
+                    userAgent: true,
+                    enumerateDevices: true,
+                    language: true,
+                },
+                audio: {
+                    timeout: 300
+                }
+            };
+            SIG.get(options, function (components) {
+                // Output all info
+                var sig = document.getElementById('sig');
+                for (var i = 0; i < components.length; i++) {
+                    var key = document.createElement("b");
+                    key.innerHTML = components[i].key + ": ";
+
+                    var val = document.createElement("span");
+                    val.innerHTML = components[i].value;
+
+                    var li = document.createElement("li");
+                    li.appendChild(key);
+                    li.appendChild(val);
+
+                    sig.appendChild(li);
+
+                    // console.log(components[i].key, components[i].value);
+                }
+
+                // Compute Hash
+                var values = components.map(function (component) {
+                    return component.value;
+                });
+                var encodedSIG = SIG.encode(values.join(''), 64);
+
+                var key = document.createElement("b");
+                key.innerHTML = "uid: ";
+
+                var val = document.createElement("span");
+                val.style.color = "red";
+                val.innerHTML = encodedSIG;
+                val.innerHTML = encodedSIG;
+
+                var li = document.createElement("li");
+                li.appendChild(key);
+                li.appendChild(val);
+
+                sig.appendChild(li);
+
+                // console.log(encodedSIG);
+            });
+        }
+        if (window.requestIdleCallback) {
+            requestIdleCallback(function () {
+                FPG();
+            })
+        } else {
+            setTimeout(function () {
+                FPG();
+            }, 800)
+        }
+    </script>
+</body>
+
+</html>
